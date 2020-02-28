@@ -1,4 +1,4 @@
 build:
-	javac src/*.java -d .
+	javac *.java -d .
 clean:
 	rm -rf *.class
