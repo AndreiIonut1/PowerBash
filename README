@@ -1,0 +1,48 @@
+Sistemul de fisiere este implementat folosind patternul composite, fiind compus
+din 2 clase: FileSystemFile si FileSystemDirectory care extind clasa abstracta
+FileSystem.
+FileSystem modeleaza comportamentul unui nod din sistemul de fisiere, contine
+implementarile comune pentru fisier si pentru folder, dar si implementarile
+default pentru metodele care au comportament diferit pentru un fisier si pentru
+un folder.
+
+Sirurile de caractere ce reprezinta caile in sistemul de fisiere sunt trimise
+ca argument unui PathTokenizer(cele fara *) si unui StarPathTokenizer(cele cu *).
+PathTokenizer o sa imparta calea in tokenuri dupa caracterul '/' si va intoarce
+o lista formata din acele tokenuri.
+StartPathTokenizeri foloseste PathTokenizer pentru a separa caile cu * in tokenuri,
+apoi orice token care nu contine * este adaugat direct intr-o lista de cai efective.
+Pentru orice token care contine *, se ia fiecare path salvat in lista, se determina
+o referinta catre directorul reprezentat de acel path si se itereaza prin director.
+Numele fiecarui nod din director este verificat folosind expresii regulate pentru a
+vedea daca respecta tokenul cu *.
+
+Comenzile peste sistemul de fisere sunt construite folosind patternul Command(o clasa
+pentru fiecare comanda).
+Pentru constructia comenzilor se folosesc patternurile singleton si factory(singleton -
+o singura instanta a clasei). 
+CommandFactory primeste drept argument numele comenzii si creeaza o instanta a 
+clasei ce reprezinta comanda respectiva.
+In cazul in care calea primita contine *, CommandFactory va crea instante ale comenzilor
+StarCommandName, pentru a trata tokenurile de tip *.
+Comenzile implementeaza interfata Command, adica prezinta o metoda execute care
+determina executarea efectiva a comenzii de catre o functie din sistemul de fisiere.
+Comenziile de tip Star itereaza prin lista de pathuri obtinute in urma inlocuirii
+tuturor * si apeleaza comenzile "clasice" pe fiecare path in parte(de exemplu
+ls * va apela comanda ls pe fiecare path rezultat).
+
+Pentru comanda grep folosita prin pipe cu ls, se creeaza o instanta a comenzii
+grep care este transmisa comenzii ls. Comanda ls va apela grep si va verifica
+daca numele nodului curent respecta patternul salvat in interiorul comenzii grep.
+
+Comenzile care implementeaza interfata Command o sa determine referinta catre
+directorul pe care trebuie executata comanda si vor apela functia corespunzatoare
+din sistemul de fisiere.
+
+Comenzile sunt invocate folosind o instanta a lui CommandInvoker, care salveaza
+comanda prin metoda setCommand si o executa prin metoda invokeCommand.
+
+Sistemul de fisiere porneste din nodul "/"(root). Este folosit un nod dummy care
+are singurul rol de a puncta catre root, astfel putem sa tratam radacina sistemul
+de fisiere ca orice alt nod(asemanator cu nodurile santinela folosite in implementarea
+listelor inlantuite).
